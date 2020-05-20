@@ -4,6 +4,7 @@ import java.util.concurrent.TimeUnit;
 public class ShipGenerator implements Runnable {
     private Tunnel currentTunnel;
     private int AwaitedShipNumber;
+    private int id_marker = 1;
     public final static Object obj = new Object();
     ShipGenerator(Tunnel tunnel, int shipcount) {
         this.currentTunnel = tunnel;
@@ -18,13 +19,15 @@ public class ShipGenerator implements Runnable {
                 public void run() {
 
                         try {
-                            Ship createdShip = new Ship();
-                            createdShip.size = getRandomSize();
-                            createdShip.type = getRandomType();
-                            createdShip.count = createdShip.size.getValue();
-                            createdShip.id = createdShip.size.getValue()*100 + createdShip.type.value;
-                            System.out.println("New ship created. its' id is " + createdShip.id +  " Sending...");
+
                             synchronized (obj) {
+                                Ship createdShip = new Ship();
+                                createdShip.size = getRandomSize();
+                                createdShip.type = getRandomType();
+                                createdShip.count = createdShip.size.getValue();
+                                createdShip.id = id_marker;
+                                id_marker +=1;
+                                System.out.println("New ship created. its' id is " + createdShip.id +  " Sending...");
                                 while (!currentTunnel.add(createdShip)) {
                                     System.out.println("Tunnel Full, we have to wait");
                                     obj.wait();
