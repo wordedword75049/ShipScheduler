@@ -16,23 +16,24 @@ public class ShipGenerator implements Runnable {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    synchronized (obj) {
+
                         try {
                             Ship createdShip = new Ship();
                             createdShip.size = getRandomSize();
                             createdShip.type = getRandomType();
                             createdShip.count = createdShip.size.getValue();
                             System.out.println("New ship created. Sending...");
-                            while (!currentTunnel.add(createdShip)) {
-                                System.out.println("Tunnel Full, we have to wait");
-                                createdShip.wait();
+                            synchronized (obj) {
+                                while (!currentTunnel.add(createdShip)) {
+                                    System.out.println("Tunnel Full, we have to wait");
+                                    createdShip.wait();
+                                }
+                                System.out.println("Sent to tunnel");
+                                notifyAll();
                             }
-                            System.out.println("Sent to tunnel");
-                            notifyAll();
                         } catch (InterruptedException e) {
                             System.out.println("Interrupted :(");
                         }
-                    }
                 }
             }).start();
         }

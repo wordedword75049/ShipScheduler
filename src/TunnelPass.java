@@ -18,23 +18,23 @@ public class TunnelPass implements Tunnel{
         new Thread(new Runnable() {
         @Override
         public void run() {
-            synchronized (obj) {
+
                 try {
                     if (ships_pass_left > 0) {
-
-                        while (queue.peek() == null) {
-                            System.out.println("desired queue is empty. Waiting for entrance....");
-                            this.wait();
+                        synchronized (obj) {
+                            while (queue.peek() == null) {
+                                System.out.println("desired queue is empty. Waiting for entrance....");
+                                this.wait();
+                            }
+                            System.out.println("Ship has come!");
+                            gotShip[0] = queue.poll();
+                            ships_pass_left--;
+                            notifyAll();
                         }
-                        System.out.println("Ship has come!");
-                        gotShip[0] = queue.poll();
-                        ships_pass_left--;
-                        notifyAll();
                     }
                 } catch (InterruptedException e) {
                     System.out.println("Interrupted :(");
                 }
-            }
         }
         }).start();
 
