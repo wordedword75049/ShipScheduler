@@ -25,7 +25,7 @@ public class ShipGenerator implements Runnable {
                             System.out.println("New ship created. Sending...");
                             while (!currentTunnel.add(createdShip)) {
                                 System.out.println("Tunnel Full, we have to wait");
-                                wait();
+                                createdShip.wait();
                             }
                             System.out.println("Sent to tunnel");
                             notifyAll();

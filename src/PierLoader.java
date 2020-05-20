@@ -1,10 +1,10 @@
 import static java.lang.Thread.sleep;
 
 public class PierLoader implements Runnable {
-    private Tunnel tunnel;
+    private TunnelPass tunnel;
     private Type shipType;
 
-    PierLoader(Tunnel tunnel, Type shipType) {
+    PierLoader(TunnelPass tunnel, Type shipType) {
         this.tunnel = tunnel;
         this.shipType = shipType;
     }
@@ -15,7 +15,6 @@ public class PierLoader implements Runnable {
             while (true) {
                 System.out.println("Getting the ship....");
                 Ship ship = tunnel.get(shipType);
-                System.out.println(ship);
                 while (ship.countCheck()) {
                     System.out.println("Loading the ship....");
                     sleep(1000);
