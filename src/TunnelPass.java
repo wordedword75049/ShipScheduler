@@ -16,8 +16,7 @@ public class TunnelPass implements Tunnel{
     @Override
     public boolean add(Ship element) {
         int tunnel_count = DressQueue.size()+BananaQueue.size()+MealQueue.size();
-        System.out.println("Adding to tunnel, there will be ");
-        System.out.println(tunnel_count+1);
+        System.out.println("Adding to tunnel, there will be " + (tunnel_count + 1));
         if (tunnel_count < 5 ) {
             if (element.type == Type.DRESS) {
                 DressQueue.offer(element);
@@ -39,9 +38,9 @@ public class TunnelPass implements Tunnel{
         if (shipType == Type.DRESS) {
             return DressQueue.poll();
         } else if (shipType == Type.BANANA) {
-            return DressQueue.poll();
+            return BananaQueue.poll();
         } else {
-            return DressQueue.poll();
+            return MealQueue.poll();
         }
     }
 }

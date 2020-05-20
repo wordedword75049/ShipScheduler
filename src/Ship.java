@@ -5,7 +5,7 @@ class Ship extends Thread {
     int id;
 
     public boolean countCheck() {
-        if (count / 10 > 0) {
+        if (count > 0) {
             return true;
         } else {
             return false;

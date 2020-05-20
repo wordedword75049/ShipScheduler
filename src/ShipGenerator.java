@@ -27,13 +27,15 @@ public class ShipGenerator implements Runnable {
                                 createdShip.count = createdShip.size.getValue();
                                 createdShip.id = id_marker;
                                 id_marker +=1;
-                                System.out.println("New ship created. its' id is " + createdShip.id +  " Sending...");
+                                System.out.println("New ship created. it is " + createdShip + " with id " + createdShip.id + " with type " + createdShip.type + ". Sending...");
                                 while (!currentTunnel.add(createdShip)) {
                                     System.out.println("Tunnel Full, we have to wait");
                                     obj.wait();
                                 }
                                 System.out.println("Sent to tunnel");
-                                notifyAll();
+                                synchronized (PierLoader.obj) {
+                                    PierLoader.obj.notifyAll();
+                                }
                             }
                         } catch (InterruptedException e) {
                             System.out.println("Interrupted :(");

@@ -29,17 +29,25 @@ public class PierLoader implements Runnable {
                 }
                 synchronized (obj) {
                     while (queue.peek() == null) {
-                        System.out.println("desired queue is empty. Waiting for entrance....");
+                        System.out.println(shipType + " queue is empty. Waiting for entrance....");
                         obj.wait();
                     }
                     System.out.println("Ship has come!");
                     ship = tunnel.get(shipType);
+                    System.out.println( shipType + " pier got ship = " + ship);
+                    System.out.println("Pier of type " + shipType + " got ship with id " + ship.id + " and size " + ship.size.getValue());
                     tunnel.ships_pass_left--;
-                    notifyAll();
+                    System.out.println("here1");
+                    synchronized (ShipGenerator.obj) {
+                        System.out.println("here2");
+                        ShipGenerator.obj.notifyAll();
+                        System.out.println("here3");
+                    }
+                    System.out.println("here4");
                 }
-                while ((ship != null) && ship.countCheck()) {
+                while (ship.countCheck()) {
                     System.out.println("Loading the ship....");
-                    Thread.sleep(1000);
+                    Thread.sleep(10);
                     ship.count -= 10;
                 }
                 System.out.println("Sending the ship....");
