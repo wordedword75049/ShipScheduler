@@ -36,6 +36,7 @@ public class ShipGenerator implements Runnable {
                                 synchronized (PierLoader.obj) {
                                     PierLoader.obj.notifyAll();
                                 }
+                                System.out.println("Piers Notified");
                             }
                         } catch (InterruptedException e) {
                             System.out.println("Interrupted :(");
