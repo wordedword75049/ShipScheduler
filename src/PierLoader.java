@@ -1,12 +1,16 @@
 import java.lang.Thread.*;
+import java.util.concurrent.*;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class PierLoader implements Runnable {
     private TunnelPass tunnel;
     public final static Object obj = new Object();
     private Type shipType;
+    private int sent_ships = 0;
 
     PierLoader(TunnelPass tunnel, Type shipType) {
         this.tunnel = tunnel;
@@ -15,45 +19,24 @@ public class PierLoader implements Runnable {
 
     @Override
     public void run() {
-        try {
-            Queue<Ship> queue = new ArrayDeque<>();
-            while (true) {
-                System.out.println("Getting the ship....");
-                Ship ship;
-                if (shipType == Type.DRESS) {
-                    queue = tunnel.DressQueue;
-                } else if (shipType == Type.BANANA) {
-                    queue = tunnel.BananaQueue;
-                } else {
-                    queue = tunnel.MealQueue;;
-                }
-                synchronized (obj) {
-                    while (queue.peek() == null) {
-                        System.out.println(shipType + " queue is empty. Waiting for entrance....");
-                        obj.wait();
+            Ship ship = new Ship();
+            while (tunnel.check_ships()) {
+                System.out.println(shipType + " pier is getting the ship....");
+                ship = tunnel.get(shipType);
+                if (ship.id != -1) {
+                    System.out.println(shipType + " pier got the ship with id " + ship.id);
+                    try {
+                        while (ship.countCheck()) {
+                            Thread.sleep(10);
+                            ship.count -= 10;
+                        }
+                        sent_ships += 1;
+                    } catch (InterruptedException e) {
+                        System.out.println("Interrupted :(");
                     }
-                    System.out.println("Ship has come!");
-                    ship = tunnel.get(shipType);
-                    System.out.println( shipType + " pier got ship = " + ship);
-                    System.out.println("Pier of type " + shipType + " got ship with id " + ship.id + " and size " + ship.size.getValue());
-                    tunnel.ships_pass_left--;
-                    System.out.println("here1");
-                    synchronized (ShipGenerator.obj) {
-                        System.out.println("here2");
-                        ShipGenerator.obj.notifyAll();
-                        System.out.println("here3");
-                    }
-                    System.out.println("here4");
+                    System.out.println(shipType + " pier is sending away the ship with id " + ship.id + ".  Total ships sent from this pier " + sent_ships);
                 }
-                while (ship.countCheck()) {
-                    System.out.println("Loading the ship....");
-                    Thread.sleep(10);
-                    ship.count -= 10;
-                }
-                System.out.println("Sending the ship....");
             }
-        } catch (InterruptedException e) {
-            System.out.println("Interrupted :(");
-        }
+        System.out.println(shipType + " pier is closed.");
     }
 }

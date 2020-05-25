@@ -17,30 +17,17 @@ public class ShipGenerator implements Runnable {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-
-                        try {
-
-                            synchronized (obj) {
-                                Ship createdShip = new Ship();
-                                createdShip.size = getRandomSize();
-                                createdShip.type = getRandomType();
-                                createdShip.count = createdShip.size.getValue();
-                                createdShip.id = id_marker;
-                                id_marker +=1;
-                                System.out.println("New ship created. it is " + createdShip + " with id " + createdShip.id + " with type " + createdShip.type + ". Sending...");
-                                while (!currentTunnel.add(createdShip)) {
-                                    System.out.println("Tunnel Full, we have to wait");
-                                    obj.wait();
-                                }
-                                System.out.println("Sent to tunnel");
-                                synchronized (PierLoader.obj) {
-                                    PierLoader.obj.notifyAll();
-                                }
-                                System.out.println("Piers Notified");
-                            }
-                        } catch (InterruptedException e) {
-                            System.out.println("Interrupted :(");
-                        }
+                    synchronized (obj) {
+                        Ship createdShip = new Ship();
+                        createdShip.size = getRandomSize();
+                        createdShip.type = getRandomType();
+                        createdShip.count = createdShip.size.getValue();
+                        createdShip.id = id_marker;
+                        id_marker += 1;
+                        System.out.println("New ship created. it is " + createdShip + " with id " + createdShip.id + " with type " + createdShip.type + ". Sending...");
+                        currentTunnel.add(createdShip);
+                        System.out.println("Sent " + createdShip.id + " ship  to tunnel");
+                    }
                 }
             }).start();
         }

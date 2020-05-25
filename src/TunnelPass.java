@@ -4,43 +4,80 @@ import java.util.Queue;
 public class TunnelPass implements Tunnel{
 
     static int ships_pass_left;
-    public final static Object obj = new Object();
     Queue<Ship> DressQueue = new ArrayDeque<>();
-    Queue<Ship> BananaQueue = new ArrayDeque<>();
-    Queue<Ship> MealQueue = new ArrayDeque<>();
+    Queue<Ship> BananaQueue = new  ArrayDeque<>();
+    Queue<Ship> MealQueue = new  ArrayDeque<>();
+    public final static Object obj = new Object();
+    int tunnel_count = 0;
 
     TunnelPass(int ships) {
         ships_pass_left = ships;
     }
 
-    @Override
-    public boolean add(Ship element) {
-        int tunnel_count = DressQueue.size()+BananaQueue.size()+MealQueue.size();
-        System.out.println("Adding to tunnel, there will be " + (tunnel_count + 1));
-        if (tunnel_count < 5 ) {
-            if (element.type == Type.DRESS) {
-                DressQueue.offer(element);
-                return true;
-            } else if (element.type == Type.BANANA) {
-                BananaQueue.offer(element);
+    public boolean check_ships() {
+        synchronized (obj) {
+            if (ships_pass_left > 0) {
                 return true;
             } else {
-                MealQueue.offer(element);
-                return true;
+                obj.notifyAll();
+                return false;
             }
-        } else {
-            return false;
         }
     }
 
     @Override
-    public Ship get(Type shipType) {
-        if (shipType == Type.DRESS) {
-            return DressQueue.poll();
-        } else if (shipType == Type.BANANA) {
-            return BananaQueue.poll();
-        } else {
-            return MealQueue.poll();
+    public boolean add(Ship element) {
+        try {
+            tunnel_count = DressQueue.size() + BananaQueue.size() + MealQueue.size();
+            synchronized (obj) {
+                while (tunnel_count >= 5) {
+                    System.out.println("Tunnel is full, ship #" +element.id+" is  waiting for some place");
+                    obj.wait();
+                }
+                System.out.println("Ship #" + element.id + " found a place in tunnel");
+                 System.out.println("Adding "+element.id+" ship to tunnel, there will be " + (tunnel_count + 1));
+                    if (element.type == Type.DRESS) {
+                        DressQueue.offer(element);
+                    } else if (element.type == Type.BANANA) {
+                        BananaQueue.offer(element);
+                    } else {
+                        MealQueue.offer(element);
+                    }
+                    obj.notifyAll();
+            }
+        } catch (InterruptedException e) {
+            System.out.println("Interrupted :(");
         }
+        return true;
+    }
+
+    @Override
+    public Ship get(Type shipType){
+        Ship polled = new Ship();
+        try {
+        Queue<Ship> queue;
+        if (shipType == Type.DRESS) {
+            queue = DressQueue;
+        } else if (shipType == Type.BANANA) {
+            queue =  BananaQueue;
+        } else {
+            queue = MealQueue;
+        }
+        synchronized (obj) {
+            while (queue.peek() == null && ships_pass_left > 0) {
+                obj.wait();
+            }
+            if (ships_pass_left > 0) {
+                polled = queue.poll();
+                tunnel_count -= 1;
+                ships_pass_left -= 1;
+                System.out.println("Ship #" + polled.id + " was taken out of tunnel to pier.");
+                obj.notifyAll();
+            }
+        }
+        } catch (InterruptedException e) {
+            System.out.println("Interrupted :(");
+        }
+        return polled;
     }
 }
